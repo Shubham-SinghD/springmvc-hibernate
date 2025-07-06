@@ -21,11 +21,13 @@ public class ReqData {
 	private String appid;
 	
 	@JsonProperty("CUSTOMER_DTO")
+	@Column(nullable = false,unique = true)
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "CUST_ID",referencedColumnName = "CUST_ID")
 	private Customer_Dto customer_dto;
 	
 	@JsonProperty("USER_DTO")
+	@Column(nullable = false,unique = true)
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "USER_NAME",referencedColumnName = "USER_NAME")
 	private User_Dto user_dto;

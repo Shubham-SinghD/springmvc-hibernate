@@ -1,6 +1,10 @@
 package com.jsp.controller;
 
 
+import java.io.Serializable;
+
+import javax.transaction.Transactional;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -19,21 +23,32 @@ import com.jsp.entity.ReqData;
 public class HomeController {
 	@Autowired
 	SessionFactory sessionFactory;
+	
+	@Transactional
 	  @PostMapping("/add")
 	  public ResponseEntity<String> addUser(@RequestBody ReqData cust) {
 	      Session session = sessionFactory.openSession();
 	      Transaction tx = null;
 	      try {
 	          tx = session.beginTransaction();
-	          session.save(cust);  
-	          tx.commit();
-	          return new ResponseEntity<>("User added: " + cust.getAppid(), HttpStatus.CREATED);
+	          System.out.println(cust.getCustomer_dto().getCust_id());
+	          
+	          if(cust.getCustomer_dto().getCust_id().isBlank()||cust.getUser_dto().getUser_name()==null) {
+	        	  throw new RuntimeException("Not Save");
+	          }
+	        Serializable save = session.save(cust); 
+
+	          if(save!=null) {
+	        	  tx.commit();
+		          return new ResponseEntity<>("User added: " + cust.getAppid(), HttpStatus.CREATED);
+	          }else {
+	        	  tx.rollback();
+	        	  return new ResponseEntity<>("User Added Fail : " + cust.getAppid(), HttpStatus.FAILED_DEPENDENCY);
+	          }
 	      } catch (Exception e) {
-	          if (tx != null) tx.rollback();
+	          tx.rollback();
 	          return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	      } finally {
-	          session.close();
-	      }
+	      } 
 	  }
 
 }
